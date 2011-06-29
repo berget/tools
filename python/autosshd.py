@@ -13,12 +13,12 @@ import errno
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 class Proxy(object):
-    DEFAULT_PORT = 8090
+    DEFAULT_PORT = 7070
     DEFAULT_PID_PATH = os.path.join(BASE_PATH, 'autosshd.pid')
     def __init__(self):
         self._port = self.DEFAULT_PORT
         self._pid_path = self.DEFAULT_PID_PATH
-        self._command = 'ssh -N -D %d zealot@losthit.com' % self._port
+        self._command = 'ssh -i ~/.ssh/id_rsa -N -D %d zealot@losthit.com' % self._port
 
     def start_forever(self):
         if self.has_instance():
