@@ -14,6 +14,7 @@ import platform
 import socket
 import datetime
 import getpass
+import re
 
 import termcolor
 
@@ -93,6 +94,49 @@ class _SysUtil(object):
 class LinuxUtil(_SysUtil):
     def __init__(self):
         return
+
+    def get_uptime(self):
+        result = 'TODO'
+        uptime = 0
+        try:
+            fp = open('/proc/uptime', 'r')
+            items = fp.read().strip().split()
+            fp.close()
+            uptime = float(items[0])
+        except Exception, e:
+            return self.on_failed(e)
+        if uptime > 0:
+            return datetime.timedelta(seconds=uptime)
+        return result
+
+    def get_cpu(self):
+        result = 'TODO'
+        content = ''
+        try:
+            fp = open('/proc/cpuinfo', 'r')
+            content = fp.read().strip()
+            fp.close()
+        except Exception, e:
+            return self.on_failed(e)
+        all = re.findall('model name\s*?:(.+)', content)
+        if all:
+            nums = len(all)
+            type = all[0].strip()
+            while '  ' in type:
+                type = type.replace('  ', ' ')
+            result = '%d * %s' % (nums, type)
+        return result
+
+    def get_memory(self):
+        result = 'TODO'
+        memsize = -1
+        try:
+            memsize = int(self.get_cmd_output('free -m -o total|grep Mem|head -1|awk \'{print $2}\''))
+        except Exception, e:
+            return self.on_failed(e)
+        if memsize > 0:
+            return '%dMB' % memsize
+        return result
 
 class MacUtil(_SysUtil):
     def __init__(self):
