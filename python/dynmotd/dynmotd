@@ -227,7 +227,7 @@ class Sysinfo(object):
         return result
 
 class Dynmotd(object):
-    MAX_LENGTH = 49
+    MAX_LENGTH = 64
     def __init__(self):
         self._method_list = (
                 self.print_asciiart,

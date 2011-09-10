@@ -1,3 +1,32 @@
-dynamic motd
+如何创建动态MOTD
 
-To display dynamic welcome message.
+背景介绍
+刚到淘宝时发现很多服务器登陆后都会显示一段AsciiArt的信息，觉得很好玩，也稍微有点用。如果你关心具体是什么，可以发送简历到jinxi.kj@taobao.com：）
+
+如何显示静态MOTD
+以上是背景，上网搜了一下，找到了相关的资料。其实很简单，只要修改了/etc/motd文件，登陆时就会被显示出来。如果需要增加颜色的话，可以参照这里的方法："So You Like Color--The Mysterious ^[[ Characters"(http://www.linuxjournal.com/article/8603。在vim中输入Ctrl+V后再按ESC，接下来写上颜色代码就行。有玩过term bbs的话应该会很熟悉。
+
+如何显示动态MOTD
+设置好/etc/motd后，马上就发现了一个问题，这是个静态的内容，自然就不能显示动态的信息。比如ip地址、硬盘占用、进程数等，除此之外，也没人喜欢部署多台机器时手动在motd中设置机器相关的参数，比如CPU、core数等。于是我就找到了这篇Blog: "HOWTO: Creating a Dynamic MOTD in Linux" (http://parkersamp.com/2010/10/howto-creating-a-dynamic-motd-in-linux/)。
+
+具体方法很简单，编写一个脚本显示动态的motd，然后添加到/etc/profile中执行就行了。当然还需要禁用/etc/motd的显示。
+
+如何禁用静态MOTD
+修改: /etc/ssh/sshd_config
+PrintMotd no
+然后重启sshd: /etc/init.d/sshd restart or service sshd restart
+更多信息参考上面提到的Blog。当然，最简单最暴力的方法是把/etc/motd文件中内容清空。
+
+如何安装动态MOTD脚本
+1. 将动态MOTD脚本放到某个目录下，比如/usr/local/bin/dynmotd。
+2. 将脚本添加到/etc/profile中
+修改: /etc/profile
+/usr/local/bin/dynmotd
+
+我自定义的Python脚本
+由于前面我找到的Blog中使用的脚本是shell导致不方便修改，而且部分信息还是写死的；另一方面，Mac下面不能完全兼容。所以我自己用Python实现了一个类似的脚本，支持MacOS与Linux。考虑到不想把这个简单脚本搞得太复杂，所以没有用到兼容性、全面性更好地psutil。有兴趣的可以自己试试。
+脚本可以到这里获取: https://github.com/chzealot/tools/tree/master/python/dynmotd
+
+显示效果
+Darwin: http://blog.losthit.com/wp-content/uploads/2011/09/darwin.jpg
+Linux: http://blog.losthit.com/wp-content/uploads/2011/09/linux.jpg
