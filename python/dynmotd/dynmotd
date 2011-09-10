@@ -1,0 +1,283 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Author: Zealot Ke <chzealot@gmail.com>
+# Copyright (C) losthit.com 2011
+
+''' dynamic motd
+
+To display dynamic welcome message.
+'''
+
+import os
+import sys
+import platform
+import socket
+import datetime
+import getpass
+
+import termcolor
+
+class _SysUtil(object):
+    NOT_IMPLEMENT = '[NOT IMPLEMENT]'
+    DISK_TO_CHECK = '/'
+    def __init__(self):
+        return
+
+    def get_hostname(self):
+        return socket.gethostname()
+
+    def get_username(self):
+        return getpass.getuser()
+
+    def get_address(self):
+        return socket.gethostbyname(socket.gethostname())
+
+    def get_kernel(self):
+        uname = os.uname()
+        return '%s %s' % (uname[0], uname[2])
+
+    def get_uptime(self):
+        return self.NOT_IMPLEMENT
+
+    def get_cpu(self):
+        return self.NOT_IMPLEMENT
+
+    def get_memory(self):
+        return self.NOT_IMPLEMENT
+
+    def get_available_disk(self):
+        result = 'TODO'
+        content = self.get_cmd_output('df -h')
+        for line in content.split('\n'):
+            items = line.split()
+            if len(items) != 6: continue
+            if items[-1] != self.DISK_TO_CHECK: continue
+            result = '%s, %s' % (items[-3].replace('Gi', 'GB'), items[-2])
+            break
+        return result
+
+    def get_sessions(self):
+        result = 'TODO'
+        nums = -1
+        try:
+            cmd = 'who |grep %s|grep -v grep|wc -l' % getpass.getuser()
+            nums = int(self.get_cmd_output(cmd))
+        except Exception, e:
+            return self.on_failed(e)
+        if nums >= 0:
+            result = '%d logins' % nums
+        return result
+
+    def get_processes(self):
+        result = 'TODO'
+        counts = 0
+        max_counts = 0
+        try:
+            counts = int(self.get_cmd_output('ps -Afl | wc -l')) - 1
+            max_counts = int(self.get_cmd_output('ulimit -u'))
+        except Exception, e:
+            return self.on_failed(e)
+        if max_counts > 0 and counts > 0:
+            result = '%d of %d MAX' % (counts, max_counts)
+        return result
+
+    def on_failed(self, e):
+        return 'Failed to get system info(%s): %s' % (platform.system(), str(e))
+
+    def get_cmd_output(self, cmd):
+        fp = platform.popen(cmd)
+        result = fp.read().strip()
+        fp.close()
+        return result
+
+class LinuxUtil(_SysUtil):
+    def __init__(self):
+        return
+
+class MacUtil(_SysUtil):
+    def __init__(self):
+        return
+
+    def get_uptime(self):
+        try:
+            import Foundation
+        except Exception, e:
+            return self.on_failed(e)
+        uptime = Foundation.NSProcessInfo.processInfo().systemUptime()
+        return datetime.timedelta(seconds=uptime)
+
+    def get_cpu(self):
+        result = 'TODO'
+        try:
+            info = self.get_cmd_output('sysctl -n machdep.cpu.brand_string')
+            num = int(self.get_cmd_output('sysctl -n hw.ncpu'))
+            result = '%d * %s' % (num, info)
+        except Exception, e:
+            return self.on_failed(e)
+        return result
+
+    def get_memory(self):
+        result = 'TODO'
+        memsize = -1
+        try:
+            memsize = int(self.get_cmd_output('sysctl -n hw.memsize'))
+        except Exception, e:
+            self.on_failed(e)
+        if memsize > 0:
+            result = '%dMB' % int(memsize / 1024.0 / 1024.0)
+        return result
+
+
+class Sysinfo(object):
+    SYSTEM_DATA_STRING = 'System Data'
+    USER_DATA_STRING = 'User Data'
+    HELP_INFO_STRING = 'Help Information'
+    SYS_UTILS = {
+            'darwin': MacUtil,
+            'linux': LinuxUtil,
+            }
+    def __init__(self):
+        self._util = self._get_util()
+        return
+
+    def get_sys_info(self):
+        sysinfo = dict()
+        sysinfo['__order'] = (self.SYSTEM_DATA_STRING, self.USER_DATA_STRING,
+                self.HELP_INFO_STRING)
+        sysinfo[self.SYSTEM_DATA_STRING] = self._get_system_data()
+        sysinfo[self.USER_DATA_STRING] = self._get_user_data()
+        sysinfo[self.HELP_INFO_STRING] = self._get_help_info()
+        return sysinfo
+
+    def _get_util(self):
+        sysname = platform.system().lower()
+        return self.SYS_UTILS.get(sysname, LinuxUtil)()
+
+    def _get_system_data(self):
+        result = {
+                'Hostname': self._util.get_hostname(),
+                'Address': self._util.get_address(),
+                'Kernel': self._util.get_kernel(),
+                'Uptime': self._util.get_uptime(),
+                'CPU': self._util.get_cpu(),
+                'Memory': self._util.get_memory(),
+                'DiskAvail': self._util.get_available_disk(),
+                '__order': ('Hostname', 'Address', 'Kernel', 'Uptime', 'CPU', 'Memory', 'DiskAvail'),
+                }
+        return result
+
+    def _get_user_data(self):
+        result = {
+                'Username': self._util.get_username(),
+                'Sessions': self._util.get_sessions(),
+                'Processes': self._util.get_processes(),
+                '__order': ('Username', 'Privlages', 'Sessions', 'Proesses', ),
+                }
+        return result
+
+    def _get_help_info(self):
+        result = {
+                'Script': os.path.realpath(__file__),
+                '__order': ('Script', 'vhosts', 'irssi', 'Box Admin'),
+                }
+        return result
+
+class Dynmotd(object):
+    MAX_LENGTH = 49
+    def __init__(self):
+        self._method_list = (
+                self.print_asciiart,
+                self.print_sysinfo,
+                self.print_quote,
+                )
+        return
+
+    def print_asciiart(self):
+        msg = """
+__________            .__          __   
+\____    /____ _____  |  |   _____/  |_ 
+  /     // __ \\\\__  \ |  |  /  _ \   __\\
+ /     /\  ___/ / __ \|  |_(  <_> )  |  
+/_______ \___  >____  /____/\____/|__|  
+        \/   \/     \/
+        """
+        print termcolor.colored(msg.strip(), 'cyan')
+        print
+
+    def print_sysinfo(self):
+        sysinfo = Sysinfo().get_sys_info()
+
+        ordered_keys = self.get_order_keys(sysinfo)
+
+        max_key_length = 0
+        for section in ordered_keys:
+            for key in sysinfo[section].iterkeys():
+                if key == '__order': continue
+                if not isinstance(key, str): continue
+                max_key_length = max(max_key_length, len(key))
+        max_key_length += 1 # one space prefix
+
+        lines = []
+        for section in ordered_keys:
+            lines.append(self._sep(section))
+            for key in self.get_order_keys(sysinfo[section]):
+                value = sysinfo[section][key]
+                lines.append(termcolor.colored('+', 'magenta') + key.rjust(max_key_length) + ' = ' + termcolor.colored(value, 'green'))
+        lines.append(self._sep())
+
+        msg = '\n'.join(lines) + '\n'
+        print msg
+
+    def print_quote(self):
+        msg = ('"Live as if you were to die tomorrow. Learn as if you were to live forever"'
+                ' -- by Gandhi.')
+        print termcolor.colored(msg.strip(), 'green')
+        print
+
+    def print_motd(self):
+        for method in self._method_list:
+            method()
+        return
+
+    def get_order_keys(self, info):
+        result = []
+        order = info.get('__order', tuple())
+        key_set = set()
+        for key in order:
+            if key in info and key not in key_set:
+                key_set.add(key)
+                result.append(key)
+        for key in info.iterkeys():
+            if key == '__order': continue
+            if key not in key_set:
+                key_set.add(key)
+                result.append(key)
+        return result
+
+    def _sep(self, msg = None):
+        if not msg:
+            return termcolor.colored('+'*self.MAX_LENGTH, 'magenta')
+
+        max_length = self.MAX_LENGTH - 10
+        if len(msg) > max_length:
+            msg = msg[:max_length - 3] + '...'
+
+        plus_length = self.MAX_LENGTH - len(msg) - 4
+        left = plus_length / 2
+        right = plus_length - left
+        result = '%s %s %s' % (termcolor.colored('+'*left+':', 'magenta'),
+                msg,
+                termcolor.colored(':'+'+'*right, 'magenta'))
+        return result
+
+def main():
+    ''' main function
+    '''
+    dynmotd = Dynmotd()
+
+    dynmotd.print_motd()
+
+    return
+
+if __name__ == '__main__':
+    main()
