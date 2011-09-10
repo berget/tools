@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Zealot Ke <chzealot@gmail.com>
 # Copyright (C) losthit.com 2011

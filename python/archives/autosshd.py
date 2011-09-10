@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Author: Ke Jie(Zealot Ke, kejie@kuxun.com)
+# Author: Zealot Ke (chzealot@gmail.com)
 
 ''' auto-build ssh-d proxy
 '''
