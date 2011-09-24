@@ -108,7 +108,7 @@ class TBConvert(object):
 
         if new_content != content and self._commit:
             print '- save "%s"' % self.magenta(self._(path))
-            #self.save_file(path, new_content)
+            self.save_file(path, new_content)
         return
 
     def convert_file(self, path):
@@ -129,12 +129,12 @@ class TBConvert(object):
 def main():
     ''' main function
     '''
-    path = '.'
+    path = os.path.realpath(os.getcwd())
     if len(sys.argv) > 1:
         path = sys.argv[1]
 
     if path.startswith('-') or path in ('commit', ):
-        path = BASE_PATH
+        path = os.path.realpath(os.getcwd())
     else:
         path = os.path.realpath(path)
 
