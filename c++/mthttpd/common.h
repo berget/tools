@@ -23,6 +23,7 @@
 
 #include <sys/stat.h>
 #include <sys/socket.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
