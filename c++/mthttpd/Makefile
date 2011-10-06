@@ -1,3 +1,7 @@
+#NOTE: build libevent(2.0.14) first!
+#1. cd ../../3rdparty/
+#2. make
+
 TARGETS			+=	simple
 TARGETS			+=	mthttpd
 

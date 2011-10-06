@@ -51,6 +51,7 @@ struct thread_body {
     size_t index;
 };
 
+/* just like bind_socket() in libevent */
 evutil_socket_t bind_socket_(const char* address, ev_uint16_t port, int reuse);
 
 bool sleep_thread(unsigned long timems);

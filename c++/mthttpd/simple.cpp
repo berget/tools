@@ -3,7 +3,9 @@
  *
  *       Filename:  simple.cpp
  *
- *    Description:  
+ *    Description:  NOTE: build libevent(2.0.14) first!
+ *                  1. cd ../../3rdparty/
+ *                  2. make
  *
  *        Version:  1.0
  *        Created:  10/07/2011 03:23:50 CST
