@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  simple.cpp
+ *       Filename:  mthttpd.cpp
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  10/07/2011 03:23:50 CST
+ *        Created:  10/07/2011 03:25:09 CST
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -22,35 +22,14 @@ using namespace std;
 
 static void handler_cb(struct evhttp_request *req, void *arg);
 
-int main(int argc, char** argv) {
-    struct event_base* base = NULL;
-    struct evhttp* httpd = NULL;
+static void* start_httpd(void* arg);
 
+int main(int argc, char** argv) {
     unsigned short port = DEFAULT_PORT;
     if (argc >= 2)
         port = (unsigned short)atoi(argv[1]);
 
-    cout << "start httpd ..." << endl << endl;
-
     signal(SIGPIPE, SIG_IGN);
-
-    cout << "Create event_base ..." << endl;
-    if ((base = event_base_new()) == NULL) {
-        cerr << "Error: cannot create an event_base instance" << endl;
-        return 1;
-    }
-    cout << "OK: create event_base" << endl;
-    cout << endl;
-
-    cout << "Create evhttp ..." << endl;
-    if ((httpd = evhttp_new(base)) == NULL) {
-        cerr << "Error: failed to create evhttp" << endl;
-        return 1;
-    }
-    cout << "OK: create evhttp" << endl;
-    cout << endl;
-
-    evhttp_set_gencb(httpd, handler_cb, NULL);
 
     cout << "Bind socket at 0.0.0.0:" << port << endl;
     evutil_socket_t fd;
@@ -70,19 +49,22 @@ int main(int argc, char** argv) {
     cout << "OK: listen socket" << endl;
     cout << endl;
 
-    cout << "Accept socket ..." << endl;
-    if (evhttp_accept_socket(httpd, fd) == -1) {
-        cerr << "Error: cannot accept socket"<< endl;
-        return 1;
+    struct thread_body thread_pool[THREAD_NUMBER];
+
+    for (size_t i = 0; i < THREAD_NUMBER; ++i) {
+        thread_pool[i].tid = 0;
+        thread_pool[i].index = i;
+        thread_pool[i].listen_fd = fd;
     }
-    cout << "OK: accept socket" << endl;
-    cout << endl;
+    for (size_t i = 0; i < THREAD_NUMBER; ++i) {
+        pthread_create(&thread_pool[i].tid, NULL, start_httpd, &thread_pool[i]);
+    }
 
-    cout << "Starting httpd ..." << endl;
-    cout << endl;
-    event_base_dispatch(base);
+    void* tret;
+    for (size_t i = 0; i < THREAD_NUMBER; ++i) {
+        pthread_join(thread_pool[i].tid, &tret);
+    }
 
-    cout << "Done" << endl;
     return 0;
 }
 
@@ -129,4 +111,46 @@ void handler_cb(struct evhttp_request *req, void *arg) {
     if (buf)
         evbuffer_free(buf);
     return;
+}
+
+void* start_httpd(void* arg) {
+    struct thread_body* body = (struct thread_body*)arg;
+    evutil_socket_t fd = body->listen_fd;
+
+    printf("start httpd: %lu, tid=%lu, at address: %p\n", body->index, (unsigned long)body->tid, body);
+
+    struct event_base* base = NULL;
+    struct evhttp* httpd = NULL;
+
+    cout << "Create event_base ..." << endl;
+    if ((base = event_base_new()) == NULL) {
+        cerr << "Error: cannot create an event_base instance" << endl;
+        return NULL;
+    }
+    cout << "OK: create event_base" << endl;
+    cout << endl;
+
+    cout << "Create evhttp ..." << endl;
+    if ((httpd = evhttp_new(base)) == NULL) {
+        cerr << "Error: failed to create evhttp" << endl;
+        return NULL;
+    }
+    cout << "OK: create evhttp" << endl;
+    cout << endl;
+
+    evhttp_set_gencb(httpd, handler_cb, NULL);
+
+    cout << "Accept socket ..." << endl;
+    if (evhttp_accept_socket(httpd, fd) == -1) {
+        cerr << "Error: cannot accept socket"<< endl;
+        return NULL;
+    }
+    cout << "OK: accept socket" << endl;
+    cout << endl;
+
+    cout << "Starting httpd ..." << endl;
+    cout << endl;
+    event_base_dispatch(base);
+
+    return NULL;
 }

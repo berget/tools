@@ -19,6 +19,8 @@
 #ifndef  COMMON_INC
 #define  COMMON_INC
 
+#include <iostream>
+
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <errno.h>
@@ -30,16 +32,25 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <pthread.h>
+
 #include <event2/event.h>
 #include <event2/http.h>
 #include <event2/buffer.h>
 #include <event2/util.h>
 #include <event2/keyvalq_struct.h>
 
-#include <iostream>
+#define DEFAULT_PORT    9527
+#define THREAD_NUMBER   12
 
-#define DEFAULT_PORT 9527
+struct thread_body {
+    pthread_t tid;
+    evutil_socket_t listen_fd;
+    size_t index;
+};
 
 evutil_socket_t bind_socket_(const char* address, ev_uint16_t port, int reuse);
+
+bool sleep_thread(unsigned long timems);
 
 #endif   /* ----- #ifndef COMMON_INC  ----- */

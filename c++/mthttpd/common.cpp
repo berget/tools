@@ -90,15 +90,28 @@ evutil_addrinfo* make_addrinfo_(const char* address, ev_uint16_t port) {
     if ((ai_result = evutil_getaddrinfo(address, strport, &hints, &ai))
             != 0) {
         /*
-        if (ai_result == EVUTIL_EAI_SYSTEM) {
-            event_warn("getaddrinfo");
-        } else {
-            event_warnx("getaddrinfo: %s",
-                    evutil_gai_strerror(ai_result));
-        }
-        */
+           if (ai_result == EVUTIL_EAI_SYSTEM) {
+           event_warn("getaddrinfo");
+           } else {
+           event_warnx("getaddrinfo: %s",
+           evutil_gai_strerror(ai_result));
+           }
+           */
         return (NULL);
     }
 
     return (ai);
+}
+bool sleep_thread(unsigned long timems) {
+    struct timespec delta;
+    struct timespec remainingSleepTime;
+    delta.tv_sec = (int)timems / 1000;
+    delta.tv_nsec = (timems % 1000) * 1000000;
+
+    if (nanosleep(&delta, &remainingSleepTime) == -1) {
+        //LOGFMT_ERROR("Failed to sleep: (%d, %s)", errno, errorString(errno));
+        return false;
+    }
+
+    return true;
 }
