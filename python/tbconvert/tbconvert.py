@@ -13,12 +13,17 @@ from termcolor import colored
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class TBConvert(object):
-    DEFAULT_VALID_SUFFIX = set(['.h', '.c', '.cpp', '.py'])
+    DEFAULT_VALID_SUFFIX = set(['.h', '.c', '.cpp', '.py', '.sh'])
     DEFAULT_REPLACE_LIST = [
+            # c && c++
             ('Author:  Zealot Ke (Zealot), chzealot@gmail.com', 'Author:  Ke Jie (jinxi), jinxi.kj@taobao.com'),
             ('Company:  losthit.com', 'Company:  taobao.com'),
+            # python
             ('# Author: Zealot Ke <chzealot@gmail.com>', '# Author: Ke Jie <jinxi.kj@taobao.com>'),
             ('# Copyright (C) losthit.com', '# Copyright (C) taobao.com'),
+            # shell
+            ('AUTHOR:  Zealot Ke (Zealot), chzealot@gmail.com', 'AUTHOR:  Ke Jie (jinxi), jinxi.kj@taobao.com'),
+            ('COMPANY:  losthit.com', 'COMPANY:  taobao.com'),
             ]
     def __init__(self):
         self._current = os.path.realpath(__file__)
