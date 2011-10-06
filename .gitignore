@@ -3,3 +3,6 @@
 .*.swp
 *.pid
 *.log
+
+include
+libs
