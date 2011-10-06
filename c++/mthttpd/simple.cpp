@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  mthttp.cpp
+ *       Filename:  simple.cpp
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  10/07/2011 01:45:38 CST
+ *        Created:  10/07/2011 03:23:50 CST
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -15,25 +15,8 @@
  *
  * =====================================================================================
  */
+
 #include "mthttp.h"
-
-#include <iostream>
-
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <time.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#include <event2/event.h>
-#include <event2/http.h>
-#include <event2/buffer.h>
-#include <event2/util.h>
-#include <event2/keyvalq_struct.h>
 
 using namespace std;
 
@@ -42,7 +25,6 @@ static void handler_cb(struct evhttp_request *req, void *arg);
 int main() {
     struct event_base* base = NULL;
     struct evhttp* httpd = NULL;
-    struct evhttp_bound_socket* handle;
 
     unsigned short port = DEFAULT_PORT;
 
@@ -69,11 +51,29 @@ int main() {
     evhttp_set_gencb(httpd, handler_cb, NULL);
 
     cout << "Bind socket at 0.0.0.0:" << port << endl;
-    if ((handle = evhttp_bind_socket_with_handle(httpd, "0.0.0.0", port)) == NULL) {
-        cerr << "Error: cannot bind socket at 0.0.0.0:" << port << endl;
-        return 1;
+    evutil_socket_t fd;
+    if ((fd = bind_socket_("0.0.0.0", port, 1 /*reuse*/)) == -1) {
+        cerr << "Error: Failed to Bind socket" << endl;
+        return -1;
     }
     cout << "OK: bind socket" << endl;
+    cout << endl;
+
+    cout << "listen socket ..." << endl;
+    if (listen(fd, 128) == -1) {
+        cerr << "Error: Failed to listen socket" << endl;
+        evutil_closesocket(fd);
+        return -1;
+    }
+    cout << "OK: listen socket" << endl;
+    cout << endl;
+
+    cout << "Accept socket ..." << endl;
+    if (evhttp_accept_socket(httpd, fd) == -1) {
+        cerr << "Error: cannot accept socket"<< endl;
+        return 1;
+    }
+    cout << "OK: accept socket" << endl;
     cout << endl;
 
     cout << "Starting httpd ..." << endl;
@@ -97,6 +97,7 @@ void handler_cb(struct evhttp_request *req, void *arg) {
     char strBuffer[32] = {0};
     ctime_r(&clock, strBuffer);
     evbuffer_add_printf(buf, "time is %s\n\n", strBuffer);
+    evbuffer_add_printf(buf, "arg is %p\n\n", arg);
     evbuffer_add_printf(buf, "Dump Headers\n");
 
     switch (evhttp_request_get_command(req)) {

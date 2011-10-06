@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  * 
- *       Filename:  mthttp.h
+ *       Filename:  simple.h
  * 
  *    Description:  
  * 
  *        Version:  1.0
- *        Created:  10/07/2011 01:46:56 CST
+ *        Created:  10/07/2011 03:23:01 CST
  *       Revision:  none
  *       Compiler:  gcc
  * 
@@ -16,9 +16,9 @@
  * =====================================================================================
  */
 
-#ifndef  MTHTTP_INC
-#define  MTHTTP_INC
+#ifndef  SIMPLE_INC
+#define  SIMPLE_INC
 
-#define DEFAULT_PORT 9527
+#include "common.h"
 
-#endif   /* ----- #ifndef MTHTTP_INC  ----- */
+#endif   /* ----- #ifndef SIMPLE_INC  ----- */
