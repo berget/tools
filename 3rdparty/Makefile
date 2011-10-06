@@ -1,7 +1,7 @@
 TARGETS			+=	gtest/lib/.libs/libgtest.a
 TARGETS			+=	libevent/.libs/libevent.a
 
-LOCAL			=	$(PROJECT_ROOT)/src/3rdparty/.local
+LOCAL			=	$(PROJECT_ROOT)/3rdparty/.local
 MKDIRS			+=	$(LOCAL)
 
 include ../common.mk
