@@ -22,6 +22,7 @@
 namespace tair {
     enum {
         TAIR_RETURN_SUCCESS = 0,
+        TAIR_RETURN_DATA_NOT_EXIST = 1,
     };
 
     class data_entry {
