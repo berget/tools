@@ -3,5 +3,6 @@
 # Wrapper around make, to colorize it's output and pipe through less.
 # Jumps to the first gcc error that occurs during the build process.
 #
+size=`stty size`
 
-make $* 2>&1 | colormake `stty size`
+make $* 2>&1 | colormake $size
