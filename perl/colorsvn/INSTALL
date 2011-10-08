@@ -1,0 +1,26 @@
+Installation Instructions
+*************************
+
+Copyright (C) 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2004, 2005 Free
+Software Foundation, Inc.
+
+This file is free documentation; the Free Software Foundation gives
+unlimited permission to copy, distribute and modify it.
+
+Basic Installation
+==================
+
+./configure 
+make
+sudo make install
+
+or 
+make install
+to store bin file into ~/.local/bin
+
+Perhaps you want to set alias to svn:
+
+    alias svn=colorsvn
+
+So if you type "svn" you'll run "colorsvn".
+
