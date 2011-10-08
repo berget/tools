@@ -39,7 +39,7 @@ $col_blink = 	    "\033[05m";
 #
 $col_default =      $col_ltgray;
 $col_gcc =          $col_green;
-$col_make =         $col_red;
+$col_make =         $col_cyan;
 $col_filename =     $col_brown;
 $col_linenum =      $col_cyan;
 $col_trace =        $col_brown;
