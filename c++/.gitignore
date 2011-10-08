@@ -1,3 +1,7 @@
 .obj
 .sharedobj
 .testobj
+*.o
+*.a
+*.so
+*.dylib
