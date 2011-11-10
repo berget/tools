@@ -13,7 +13,7 @@ import errno
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 class Proxy(object):
-    DEFAULT_PORT = 7070
+    DEFAULT_PORT = 8080
     DEFAULT_PID_PATH = os.path.join(BASE_PATH, 'autosshd.pid')
     def __init__(self):
         self._port = self.DEFAULT_PORT

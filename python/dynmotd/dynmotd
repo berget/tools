@@ -24,6 +24,23 @@ class _SysUtil(object):
     def __init__(self):
         return
 
+    def get_memorial(self):
+        result = ''
+        start = datetime.datetime(2008, 3, 9)
+        end = datetime.datetime.today()
+
+        delta = end - start
+
+        result = str(delta)
+
+        print end.year, end.month, end.day
+        if end.month == 3 and end.day == 10:
+            result += termcolor.colored(' %d years!' % (end.year - start.year), 'red')
+        elif end.day == 10:
+            result += termcolor.colored((' %d month!' % ((end.year - start.year) * 12 + end.month - start.month)), 'red')
+
+        return result
+
     def get_hostname(self):
         return socket.gethostname()
 
@@ -222,7 +239,8 @@ class Sysinfo(object):
     def _get_help_info(self):
         result = {
                 'Script': os.path.realpath(__file__),
-                '__order': ('Script', 'vhosts', 'irssi', 'Box Admin'),
+                'Memorial': self._util.get_memorial(),
+                '__order': ('Script', 'vhosts', 'irssi', 'Box Admin', 'Memorial'),
                 }
         return result
 
