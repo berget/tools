@@ -6,7 +6,7 @@ send email simply, support attachments, unicode and /usr/sbin/sendmail(8).
 
 Released under MIT license.
 
-Thanks to Ryan Ginstrom for he/her work: http://ginstrom.com/code/mailer.html and 
+Thanks to Ryan Ginstrom for his/her work: http://ginstrom.com/code/mailer.html and 
 Python email module document: http://docs.python.org/library/email-examples.html
 
 ## Features
