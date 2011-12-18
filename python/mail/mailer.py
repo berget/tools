@@ -65,7 +65,21 @@ except:
 import mimetypes
 
 class Message(object):
+    ''' message binding for mail, such as recp,cc,subject,etc. '''
     def __init__(self, **kwargs):
+        ''' init message with key,value arguments
+        support
+        - recp: list of recipient, required
+        - cc: list of cc, optional
+        - bcc: list of bcc, optional
+        - subject: mail title, required
+        - sender: optional, default as "user@hostname"
+        - html: mail body of html
+        - text: mail body of plain text
+        - importance: "high" or "low"
+        - attachments: file list
+        e.g. Message(recp='foo@bar.com', subject='hello', text='world')
+        '''
         self.sender = kwargs.get('sender') or self._get_default_sender()
 
         self.recp = kwargs.get('recp') or []
@@ -86,6 +100,7 @@ class Message(object):
         return
 
     def get_receiver(self):
+        ''' get all receivers '''
         return self.recp + self.cc + self.bcc
 
     def as_string(self):
@@ -112,9 +127,11 @@ class Message(object):
         return msg.as_string()
 
     def _get_default_sender(self):
+        ''' generate default sender: "user@hostname" '''
         return '%s@%s' % (getpass.getuser(), socket.gethostname())
 
     def _header(self, value):
+        ''' convert value to a valid mail header '''
         if isinstance(value, str):
             value = unicode(value, self.encoding)
         if isinstance(value, list) or isinstance(value, tuple):
@@ -131,18 +148,21 @@ class Message(object):
         return _MIMEText(self.text, 'plain', self.encoding)
 
     def _attach_text(self, msg, inline=False):
+        ''' attach plain text body '''
         part = _MIMEText(self.text, 'plain', self.encoding)
         if inline:
             part.add_header('Content-Disposition', 'inline')
         msg.attach(part)
 
     def _attach_html(self, msg, inline=False):
+        ''' attach html body '''
         part = _MIMEText(self.html, 'html', self.encoding)
         if inline:
             part.add_header('Content-Disposition', 'inline')
         msg.attach(part)
 
     def _attach_files(self, outer):
+        ''' attach file list '''
         for attachment in self._attachments:
             filename = attachment
             cid = None
@@ -177,11 +197,14 @@ class Message(object):
 
 
 class Mailer(object):
+    ''' python mailer module to send email '''
     def __init__(self, server='localhost'):
+        ''' init with mail server '''
         self._server = server
         return
 
     def send(self, msg):
+        ''' send mail message '''
         server = smtplib.SMTP(self._server)
         me = msg.sender
         you = msg.get_receiver()
@@ -193,8 +216,11 @@ class Mailer(object):
 def main():
     ''' main function
     '''
-    msg = Message(recp = ['chzealot@gmail.com'], subject='hello from mailer module', html=u'html body', importance='low', attachments=['/etc/hosts']) 
-
+    msg = Message(recp = ['chzealot@gmail.com'],
+            subject='hello from mailer module',
+            html=u'html body',
+            importance='low',
+            attachments=['/etc/hosts']) 
     mailer = Mailer()
     mailer.send(msg)
     print 'Done'
