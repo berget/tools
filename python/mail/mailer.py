@@ -23,7 +23,7 @@ Example
     msg = Message(recp = ['foo@bar.com'], subject='hello', text='world') 
     mailer = Mailer()
     mailer.send(msg)
-2. basic
+2. send html mail
     msg = Message(recp = ['foo@bar.com'], subject='hello', html='<html><body>world</body></html>') 
     mailer = Mailer()
     mailer.send(msg)
@@ -182,7 +182,6 @@ class Mailer(object):
         return
 
     def send(self, msg):
-        print msg.as_string()
         server = smtplib.SMTP(self._server)
         me = msg.sender
         you = msg.get_receiver()
@@ -194,9 +193,7 @@ class Mailer(object):
 def main():
     ''' main function
     '''
-    #msg = Message(sender='adf', recp = ['chzealot@gmail.com'], subject='hello', text='world', importance='high')
-    msg = Message(recp = ['chzealot@gmail.com'], subject='hello', text='world', html=u'html', importance='high') 
-    msg = Message(recp = ['chzealot@gmail.com'], subject='hello', text='world', html=u'html', importance='high', attachments=['/etc/hosts']) 
+    msg = Message(recp = ['chzealot@gmail.com'], subject='hello from mailer module', html=u'html body', importance='low', attachments=['/etc/hosts']) 
 
     mailer = Mailer()
     mailer.send(msg)
