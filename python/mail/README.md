@@ -1,4 +1,4 @@
-# simple mail module
+# Simple Module to Send Mail via Python
 
 ## Description
 
@@ -6,7 +6,7 @@ send email simply, support attachments, unicode and /usr/sbin/sendmail(8).
 
 Released under MIT license.
 
-Thanks for Ryan Ginstrom's work: http://ginstrom.com/code/mailer.html and 
+Thanks to Ryan Ginstrom for he/her work: http://ginstrom.com/code/mailer.html and 
 Python email module document: http://docs.python.org/library/email-examples.html
 
 ## Features
@@ -18,6 +18,11 @@ Python email module document: http://docs.python.org/library/email-examples.html
 * support default sender(user@hostname)
 
 ## Example
+
+0. startup sendmail if required
+   sudo /etc/init.d/sendmail start
+   or
+   sudo service sendmail start
 
 1. basic
     msg = Message(recp = ['foo@bar.com'], subject='hello', text='world') 
@@ -35,3 +40,8 @@ Python email module document: http://docs.python.org/library/email-examples.html
     msg = Message(recp = ['foo@bar.com'], subject='hello', text='world', importance='high') 
     mailer = Mailer()
     mailer.send(msg)
+
+
+# TODO
+
+* support stmp login
