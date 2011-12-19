@@ -20,33 +20,42 @@ Python email module document: http://docs.python.org/library/email-examples.html
 ## Example
 
 0. startup sendmail if required
-   `sudo /etc/init.d/sendmail start`
-   or
-   `sudo service sendmail start`
+
+`sudo /etc/init.d/sendmail start`
+or
+`sudo service sendmail start`
 
 1. basic
 
-   * msg = Message(recp = ['foo@bar.com'], subject='hello', text='world')
-   * mailer = Mailer()
-   * mailer.send(msg)
+```python
+msg = Message(recp = ['foo@bar.com'], subject='hello', text='world')
+mailer = Mailer()
+mailer.send(msg)
+```
 
 2. send html mail
 
-   * msg = Message(recp = ['foo@bar.com'], subject='hello', html='<html><body>world</body></html>') 
-   * mailer = Mailer()
-   * mailer.send(msg)
+```python
+msg = Message(recp = ['foo@bar.com'], subject='hello', html='<html><body>world</body></html>') 
+mailer = Mailer()
+mailer.send(msg)
+```
 
 3. attachments
 
-   * msg = Message(recp = ['foo@bar.com'], subject='hello', text='world', attachments=['/etc/foobar']) 
-   * mailer = Mailer()
-   * mailer.send(msg)
+```python
+msg = Message(recp = ['foo@bar.com'], subject='hello', text='world', attachments=['/etc/foobar']) 
+mailer = Mailer()
+mailer.send(msg)
+```
 
 4. importance(high or low)
 
-   * msg = Message(recp = ['foo@bar.com'], subject='hello', text='world', importance='high') 
-   * mailer = Mailer()
-   * mailer.send(msg)
+```python
+msg = Message(recp = ['foo@bar.com'], subject='hello', text='world', importance='high') 
+mailer = Mailer()
+mailer.send(msg)
+```
 
 
 ## TODO
