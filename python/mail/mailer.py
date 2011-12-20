@@ -3,7 +3,7 @@
 # Author: Ke Jie <jinxi.kj@taobao.com>
 # Copyright (C) taobao.com 2011
 
-''' simple mail module
+''' simple mail module in Python
 send email simply, support attachments, unicode and /usr/sbin/sendmail(8).
 
 Released under MIT license.
@@ -11,7 +11,7 @@ Released under MIT license.
 Thanks for Ryan Ginstrom's work: http://ginstrom.com/code/mailer.html and 
 Python email module document: http://docs.python.org/library/email-examples.html
 
-Feature
+Features
 - support both smtp directly and /usr/sbin/sendmail(8)
 - support attachments
 - support unicode
@@ -34,6 +34,11 @@ Example
 4. importance(high or low)
     msg = Message(recp = ['foo@bar.com'], subject='hello', text='world', importance='high') 
     mailer = Mailer()
+    mailer.send(msg)
+5. send with smtp directly
+    msg = Message(sender='foobar@example.com', recp = ['foo@bar.com'], subject='hello', text='world')
+    mailer = Mailer('mail.example.com')
+    mailer.login('foobar@example.com', 'password')
     mailer.send(msg)
 '''
 
@@ -199,29 +204,41 @@ class Message(object):
 class Mailer(object):
     ''' python mailer module to send email '''
     def __init__(self, server='localhost'):
-        ''' init with mail server '''
+        ''' init with mail server, default as "localhost" to use /usr/sbin/sendmail(8) '''
         self._server = server
-        return
+        self._smtp = smtplib.SMTP(self._server)
+        self._user = None
+        self._password = None
+
+    def login(self, user, password):
+        ''' login to send mail with smtp directly '''
+        self._user = user
+        self._password = password
+        self._smtp.ehlo()
+        self._smtp.starttls()
+        self._smtp.ehlo()
+        self._smtp.login(user, password)
 
     def send(self, msg):
         ''' send mail message '''
-        server = smtplib.SMTP(self._server)
         me = msg.sender
         you = msg.get_receiver()
-        server.sendmail(me, you, msg.as_string())
-        server.quit()
-        return
+        self._smtp.sendmail(me, you, msg.as_string())
+        self._smtp.quit()
 
 
 def main():
     ''' main function
     '''
     msg = Message(recp = ['chzealot@gmail.com'],
+            #sender = 'foobar@163.com',
             subject='hello from mailer module',
             html=u'html body',
             importance='low',
             attachments=['/etc/hosts']) 
     mailer = Mailer()
+    #mailer = Mailer('smtp.163.com')
+    #mailer.login('foobar@163.com', 'password')
     mailer.send(msg)
     print 'Done'
 

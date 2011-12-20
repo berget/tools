@@ -57,7 +57,15 @@ mailer = Mailer()
 mailer.send(msg)
 ```
 
+5. send with smtp directly
+
+```python
+    msg = Message(sender='foobar@example.com', recp = ['foo@bar.com'], subject='hello', text='world')
+    mailer = Mailer('mail.example.com')
+    mailer.login('foobar@example.com', 'password')
+    mailer.send(msg)
+```
 
 ## TODO
 
-* support stmp login
+* to be user experience friendly
