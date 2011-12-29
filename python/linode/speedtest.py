@@ -47,6 +47,7 @@ class Benchmark(object):
         table = [keys,]
         table += [[i[k]for k in keys] for i in facilities]
         self._print_table(table)
+        print '# @note: get datacenters from: %s' % self.SPEED_TEST_URL
         return
 
     def _print_table(self, table):
