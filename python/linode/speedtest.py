@@ -103,7 +103,7 @@ class Benchmark(object):
     def test_download(self, facilities):
         result = []
         for info in facilities:
-            print '- downlaod %s ...' % info['url']
+            print '- download %s ...' % info['url']
             start_time = time.time()
             content = self.download(info['url'])
             delta = time.time() - start_time
