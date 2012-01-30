@@ -1,0 +1,7 @@
+see
+1. http://wiki.nginx.org/Nginx-init-ubuntu
+2. http://code.google.com/p/nginx-init-ubuntu/
+
+Installation:
+1. Save this file as /etc/init.d/nginx. The script is bundled in the tar as 'nginx', however I like to personally re-name it as 'nginx-init' on my system. The choice is yours.
+2. Run: /usr/sbin/update-rc.d -f nginx defaults
