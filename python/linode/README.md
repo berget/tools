@@ -1,3 +1,18 @@
+自动测试Linode机房的访问速度
+
+#. 自动获取最新的Linode机房列表
+#. 获取ping值列表，去除最高值、最低值后求平均
+#. 从各个机房下载100MB的文件，计算平均下载速度
+
+测试报告包括
+
+#. 各个机房ping值，从小到大排序
+#. 各个机房下载速度，从大到小排序
+
+Note: 广告时间，如果你有兴趣注册Linode并购买VPS，欢迎使用我的Referer链接: http://www.linode.com/?r=2e236898b83cd7963f1cb6136e7b00cb9f13d1d8 ，非常感谢
+
+以下是杭州电信网络下的测试结果，仅供参考。
+
 == Run SpeedTest For Linode Facilities ==
 
 Example
