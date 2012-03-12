@@ -1,0 +1,209 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Author: Zealot Ke <chzealot@gmail.com>
+# Copyright (C) losthit.com 2012
+
+'''
+'''
+
+import os
+import re
+import sys
+import time
+import shutil
+import datetime
+
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+def define_options():
+    from optparse import OptionParser
+    usage = 'usage: %prog [options] FILE1 FILE2 ...'
+    parser = OptionParser(usage=usage)
+    parser.add_option('-f', '--force',
+            action='store_true', dest='force', default=False,
+            help='force to remove')
+    parser.add_option('-t', '--limit-time',
+            dest='limit_time',
+            help='limited time, support 10s, 10m, 10h')
+    parser.add_option('-q', '--quiet',
+            action='store_false', dest='verbose', default=True,
+            help='don\'t print status messages to stdout')
+    options,args = parser.parse_args()
+    setattr(options, 'files', args)
+    return options
+
+class LimitedRm(object):
+    BLOCK_SIZE = 4096
+    NEAR_ZERO = 0.000001
+    ADJUST_RATE = 0.95
+    def __init__(self, options):
+        self._block_size = self.BLOCK_SIZE
+
+        self._options = options
+
+        self._file_list = []
+        self._file_stat = {}
+
+        self._sleep_time = 0.5
+
+        self._time_limit = 0
+        self._total_size = 0
+        self._total_rate = 0
+
+        self._truncate_size = 0
+        self._remain_size = 0
+        self._cost_time = 0
+
+        self._remain_time = 0
+        self._min_time_limit = 0
+
+        self._begin_time = 0
+        self._end_time = 0
+        return
+
+    def _parse_time(self, time_string):
+        result = 0
+        time_string = self.to_string(time_string).strip()
+        if time_string.isdigit():
+            result = int(time_string)
+        else:
+            for number, unit in re.findall(r'([\d]+)(h|m|s)', time_string):
+                count = int(number)
+                rate = 1
+                if unit == 'h': rate = 3600
+                elif unit == 'm': rate = 60
+                result += count * rate
+        return result
+
+    def _get_size(self, path):
+        return os.stat(path).st_size
+
+    def _stat_files(self):
+        for f in self._options.files:
+            path = os.path.join(BASE_PATH, f)
+            if not os.path.isfile(path):
+                if self._options.force:
+                    print 'ignore, file not exists: %s' % f
+                else:
+                    print 'error, file not exists: %s' % f
+                    return False
+            else:
+                if path not in self._file_stat:
+                    self._file_stat[path] = {}
+                    self._file_list.append(path)
+        
+        if not self._file_list:
+            if not self._options.force:
+                print 'error, empty file list'
+                return False
+            return True
+
+        for path in self._file_stat.keys():
+            self._file_stat[path] = self._get_size(path)
+            self._total_size += self._file_stat[path]
+        return True
+
+    def _generate_stat(self):
+        self._truncate_size = 0
+        self._remain_size = self._total_size
+        self._remain_time = self._time_limit
+        self._begin_time = time.time()
+        return
+
+    def _stat(self, truncate_size):
+        # size
+        self._remain_size -= truncate_size
+        self._truncate_size += truncate_size
+
+        # time
+        self._cost_time = time.time() - self._begin_time
+        self._remain_time = self._time_limit - self._cost_time
+
+        # calculate rate
+        self._total_rate = float(self._truncate_size) / self._cost_time
+
+        # adjust
+        require_time = self._remain_size / float(self._total_rate)
+        if require_time <= 0: require_time = self.NEAR_ZERO
+        self._sleep_time = float(self._remain_time) / require_time * self._sleep_time * self.ADJUST_RATE
+        if self._sleep_time <= 0:
+            self._sleep_time = self.NEAR_ZERO
+        return
+
+    def _remove(self, path):
+        if self._options.verbose:
+            print '[%s] remove %s ...' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), path)
+
+        file_remain_size = self._get_size(path)
+        fp = open(path, 'a+')
+
+        while file_remain_size > self._block_size:
+            # truncate
+            file_remain_size = self._get_size(path) - self._block_size
+            fp.truncate(file_remain_size)
+            fp.flush()
+            # sleep 
+            time.sleep(self._sleep_time)
+            # stat
+            self._stat(self._block_size)
+
+        fp.close()
+
+        # remove file
+        file_remain_size = self._get_size(path) - self._block_size
+        os.remove(path)
+        self._stat(file_remain_size)
+        return
+
+    def to_string(self, s, encoding = 'utf-8'):
+        result = ''
+        if s == None: return result
+        if isinstance(s, unicode):
+            result = s.encode(encoding, 'ignore')
+        else:
+            result = str(s)
+        return result
+
+    def validate_options(self):
+        self._time_limit = self._parse_time(self._options.limit_time)
+        if not self._time_limit:
+            print 'Error: invalid limited time: %s.' % self._options.limit_time
+            return False
+
+        if not self._options.files:
+            print 'exit: file list is empty.'
+            return True
+        return True
+
+    def start(self):
+        if self._stat_files() == False:
+            return False
+
+        self._generate_stat()
+
+        for path in self._file_list:
+            self._remove(path)
+
+        self._end_time = time.time()
+        delta = datetime.datetime.fromtimestamp(self._end_time) - datetime.datetime.fromtimestamp(self._begin_time)
+        print 'cost time: %s' % delta
+        return
+
+
+def main():
+    ''' main function
+    '''
+    # parse command line options
+    options = define_options()
+
+    rm = LimitedRm(options)
+
+    if not rm.validate_options():
+        return
+
+    rm.start()
+
+    return
+
+if __name__ == '__main__':
+    main()
