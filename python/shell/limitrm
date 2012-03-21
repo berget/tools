@@ -12,6 +12,7 @@ import sys
 import time
 import shutil
 import datetime
+import time
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,6 +20,12 @@ def define_options():
     from optparse import OptionParser
     usage = 'usage: %prog [options] FILE1 FILE2 ...'
     parser = OptionParser(usage=usage)
+    parser.add_option('-b', '--block-size',
+            dest='block', default = 4906,
+            help='block size, default as 4k. support 4m 4k 4')
+    parser.add_option('-d', '--debug',
+            action='store_true', dest='debug', default=False,
+            help='print debug message')
     parser.add_option('-f', '--force',
             action='store_true', dest='force', default=False,
             help='force to remove')
@@ -59,6 +66,8 @@ class LimitedRm(object):
 
         self._begin_time = 0
         self._end_time = 0
+
+        self._last_debug_time = -1
         return
 
     def _parse_time(self, time_string):
@@ -72,6 +81,20 @@ class LimitedRm(object):
                 rate = 1
                 if unit == 'h': rate = 3600
                 elif unit == 'm': rate = 60
+                result += count * rate
+        return result
+
+    def _parse_block_size(self, block):
+        result = 0
+        block_string = self.to_string(block).strip()
+        if block_string.isdigit():
+            result = int(block_string)
+        else:
+            for number, unit in re.findall(r'([\d]+)(m|k|b)', block_string):
+                count = int(number)
+                rate = 1
+                if unit == 'm': rate = 1024 * 1024
+                elif unit == 'k': rate = 1024
                 result += count * rate
         return result
 
@@ -130,27 +153,53 @@ class LimitedRm(object):
             self._sleep_time = self.NEAR_ZERO
         return
 
+    def _debug(self, msg):
+        if not self._options.debug: return
+
+        if self._last_debug_time <= -1:
+            self._last_debug_time = time.time()
+
+        current_time = time.time()
+        print '[%s %.6f] %s, cost %.6f sec' % (
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                current_time,
+                msg,
+                current_time - self._last_debug_time)
+        self._last_debug_time = current_time
+
     def _remove(self, path):
         if self._options.verbose:
             print '[%s] remove %s ...' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), path)
 
         file_remain_size = self._get_size(path)
+        self._debug('open %s' % path)
         fp = open(path, 'a+')
 
         while file_remain_size > self._block_size:
+            self._debug('=' * 32)
+            self._debug('start truncate, size is %d' % file_remain_size)
+
             # truncate
             file_remain_size = self._get_size(path) - self._block_size
             fp.truncate(file_remain_size)
+            self._debug('after truncate')
             fp.flush()
+            self._debug('after flush')
             # sleep 
+            self._debug('sleep %.6f sec' % self._sleep_time)
             time.sleep(self._sleep_time)
+            self._debug('after sleep')
             # stat
             self._stat(self._block_size)
+            self._debug('after stat')
+
+            self._debug('end truncate, size is %d' % file_remain_size)
 
         fp.close()
 
         # remove file
         file_remain_size = self._get_size(path) - self._block_size
+        self._debug('really remove file')
         os.remove(path)
         self._stat(file_remain_size)
         return
@@ -170,12 +219,18 @@ class LimitedRm(object):
             print 'Error: invalid limited time: %s.' % self._options.limit_time
             return False
 
+        self._block_size = self._parse_block_size(self._options.block)
+        if self._block_size <= 0:
+            print 'Error: invalid block size: %s.' % self._options.block
+            return False
+
         if not self._options.files:
             print 'exit: file list is empty.'
             return True
         return True
 
     def start(self):
+        self._debug('start')
         if self._stat_files() == False:
             return False
 
@@ -187,6 +242,7 @@ class LimitedRm(object):
         self._end_time = time.time()
         delta = datetime.datetime.fromtimestamp(self._end_time) - datetime.datetime.fromtimestamp(self._begin_time)
         print 'cost time: %s' % delta
+        self._debug('done')
         return
 
 
