@@ -149,7 +149,8 @@ class Message(object):
         if self._attachments:
             return _MIMEMultipart('related')
         elif self.html:
-            return _MIMEMultipart('alternative')
+            #return _MIMEMultipart('alternative')
+            return _MIMEText(self.html, 'html', self.encoding)
         return _MIMEText(self.text, 'plain', self.encoding)
 
     def _attach_text(self, msg, inline=False):
@@ -232,10 +233,9 @@ def main():
     '''
     msg = Message(recp = ['chzealot@gmail.com'],
             #sender = 'foobar@163.com',
-            subject=u'hello from mailer module',
-            text=u'text body',
-            importance='low',
-            attachments=['/etc/hosts'])
+            subject=u'hello from mailer module test',
+            html=u'<html><body>hello world</body></html>',
+            importance='low')
     mailer = Mailer()
     #mailer = Mailer('smtp.163.com')
     #mailer.login('foobar@163.com', 'password')
