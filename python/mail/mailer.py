@@ -192,12 +192,12 @@ class Message(object):
                 _encoder.encode_base64(msg)
             fp.close()
 
-        if cid:
-            msg.add_header('Content-ID', '<%s>' % cid)
-            msg.add_header('Content-Disposition', 'inline')
-        else:
-            msg.add_header('Content-Disposition', 'attachment', filename=os.path.basename(filename))
-        outer.attach(msg)
+            if cid:
+                msg.add_header('Content-ID', '<%s>' % cid)
+                msg.add_header('Content-Disposition', 'inline')
+            else:
+                msg.add_header('Content-Disposition', 'attachment', filename=os.path.basename(filename))
+            outer.attach(msg)
         return
 
 
@@ -232,10 +232,10 @@ def main():
     '''
     msg = Message(recp = ['chzealot@gmail.com'],
             #sender = 'foobar@163.com',
-            subject='hello from mailer module',
-            html=u'html body',
+            subject=u'hello from mailer module',
+            text=u'text body',
             importance='low',
-            attachments=['/etc/hosts']) 
+            attachments=['/etc/hosts'])
     mailer = Mailer()
     #mailer = Mailer('smtp.163.com')
     #mailer.login('foobar@163.com', 'password')
