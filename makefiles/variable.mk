@@ -3,7 +3,7 @@ CODE		?=	C++
 
 OPTIONS		+=
 
-LIB			=	$(PROJECT_ROOT)/libs
+LIB			=	$(PROJECT_ROOT)/lib
 INC			=	$(PROJECT_ROOT)/include
 
 OBJ_DIR		=	.obj
