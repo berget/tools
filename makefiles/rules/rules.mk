@@ -17,18 +17,18 @@ TOFILES		=	$(CXXFILES:%.cpp=$(TOBJ_DIR)/%.o)
 
 .SECONDARY: $(OFILES) $(SOFILES) $(TOFILES)
 
-$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
-	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-$(SOBJ_DIR)/%.o: %.cpp | $(SOBJ_DIR)
-	$(CC) $(CC_PIC_FLAG) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-$(TOBJ_DIR)/%.o: %.cpp | $(TOBJ_DIR)
-	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-#$(OBJ_DIR)/%.o:: %$(CODE_EXT) | $(OBJ_DIR)
+#$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 #	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-#$(SOBJ_DIR)/%.o:: %$(CODE_EXT) | $(SOBJ_DIR)
+#$(SOBJ_DIR)/%.o: %.cpp | $(SOBJ_DIR)
 #	$(CC) $(CC_PIC_FLAG) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-#$(TOBJ_DIR)/%.o:: %$(CODE_EXT) | $(TOBJ_DIR)
+#$(TOBJ_DIR)/%.o: %.cpp | $(TOBJ_DIR)
 #	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
+$(OBJ_DIR)/%.o:: %$(CODE_EXT) | $(OBJ_DIR)
+	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
+$(SOBJ_DIR)/%.o:: %$(CODE_EXT) | $(SOBJ_DIR)
+	$(CC) $(CC_PIC_FLAG) -c $(CFLAGS) $(INCLUDE) $^ -o $@
+$(TOBJ_DIR)/%.o:: %$(CODE_EXT) | $(TOBJ_DIR)
+	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
 
 %$(STATIC_LIB_EXT): $(OFILES)	| $(LIB)
 	@echo "Generating static library: $@ ..."

@@ -7,13 +7,13 @@ include $(PROJECT_ROOT)/makefiles/command.mk
 include $(PROJECT_ROOT)/makefiles/variable.mk
 include $(PROJECT_ROOT)/makefiles/gcov.mk
 
+include $(PROJECT_ROOT)/makefiles/$(COMPILER)/$(CODE).mk
 include $(PROJECT_ROOT)/makefiles/rules/rules.mk
 
 INCLUDE		+=	-I$(INC)
 INCLUDE		+=	-I$(PROJECT_ROOT)/src
-LDFLAGS		+=	-L$(LIB)
+#LDFLAGS		+=	-L$(LIB)
 
-include $(PROJECT_ROOT)/makefiles/$(COMPILER)/$(CODE).mk
 include $(PROJECT_ROOT)/makefiles/platform/$(PLATFORM).mk
 
 # coverage in unittest
