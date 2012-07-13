@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 const unsigned long HASH_START_VALUE = 5381;
-const size_t BENCHMAKR_TIME = 1000L * 1000 * 10 * 10 * 10 * 6;
+const size_t BENCHMAKR_TIME = 1000L * 1000 * 10 * 10;
 
 struct str_arg_t {
     char* str;

@@ -83,14 +83,14 @@ void Regression::add_case(const string &str, unsigned long hash_code) {
 
 #define ADD_METHOD(m) _methods.push_back(make_pair(#m, m));
 void Regression::start() {
-    // ADD_METHOD(time33_simple);
-    // ADD_METHOD(time33_simple_shift);
+    ADD_METHOD(time33_simple);
+    ADD_METHOD(time33_simple_shift);
     ADD_METHOD(time33_simple_unsigned_char);
-    // ADD_METHOD(time33_simple_unsigned_long);
-    // ADD_METHOD(time33_simple_truncate);
-    // ADD_METHOD(time33_apache);
-    // ADD_METHOD(time33_php);
-    // ADD_METHOD(time33_debug);
+    ADD_METHOD(time33_simple_unsigned_long);
+    ADD_METHOD(time33_simple_truncate);
+    ADD_METHOD(time33_apache);
+    ADD_METHOD(time33_php);
+    ADD_METHOD(time33_debug);
 
     string name;
     for (size_t i = 0; i < _cases.size(); ++i) {

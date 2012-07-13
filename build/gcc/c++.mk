@@ -10,6 +10,7 @@ AR				?=	ar
 
 # Arguments for the compiler tools
 #ARGS_CC                 =	-pedantic -Wall -Wextra -Wno-variadic-macros
+#ARGS_CC                 =	-Wall -Wextra -Wno-variadic-macros
 ARGS_CC                 =	-Wall -Wno-variadic-macros
 ARGS_LIBTOOL_COMPILE    ?=	--mode=compile
 ARGS_LIBTOOL_LINK       =	$(PLATFORM_LIBTOOL_LINK)

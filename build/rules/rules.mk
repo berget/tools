@@ -1,15 +1,19 @@
 .PHONY: all prereq debug clean
 
-all: prereq $(TARGETS)
-	@echo "$(TARGETS) is ready"
+all:: prereq $(TARGETS)
+ifeq ($(strip $(TARGETS)),)	# $(TARGETS) is empty
+else
+	@echo "$(TARGETS) is ready."
+endif
 
-release:
+release::
 	$(MAKE) all $(OPTIONS)
 
-prereq:
-	for dir in $(SUBDIRS); do	\
-		$(MAKE) -C $$dir all $(OPTIONS);	\
-	done
+prereq::
+	@for dir in $(SUBDIRS); do $(MAKE) -C $$dir all $(OPTIONS); done
+
+install::
+	@for dir in $(SUBDIRS); do $(MAKE) -C $$dir install $(OPTIONS); done
 
 OFILES		=	$(CXXFILES:%.cpp=$(OBJ_DIR)/%.o)
 SOFILES		=	$(CXXFILES:%.cpp=$(SOBJ_DIR)/%.o)
@@ -17,30 +21,29 @@ TOFILES		=	$(CXXFILES:%.cpp=$(TOBJ_DIR)/%.o)
 
 .SECONDARY: $(OFILES) $(SOFILES) $(TOFILES)
 
-#$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
-#	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-#$(SOBJ_DIR)/%.o: %.cpp | $(SOBJ_DIR)
-#	$(CC) $(CC_PIC_FLAG) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-#$(TOBJ_DIR)/%.o: %.cpp | $(TOBJ_DIR)
-#	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-$(OBJ_DIR)/%.o:: %$(CODE_EXT) | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-$(SOBJ_DIR)/%.o:: %$(CODE_EXT) | $(SOBJ_DIR)
+$(SOBJ_DIR)/%.o: %.cpp | $(SOBJ_DIR)
 	$(CC) $(CC_PIC_FLAG) -c $(CFLAGS) $(INCLUDE) $^ -o $@
-$(TOBJ_DIR)/%.o:: %$(CODE_EXT) | $(TOBJ_DIR)
+$(TOBJ_DIR)/%.o: %.cpp | $(TOBJ_DIR)
 	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
+
+#$(OBJ_DIR)/%.o:: %$(CODE_EXT) | $(OBJ_DIR)
+#	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
+#$(SOBJ_DIR)/%.o:: %$(CODE_EXT) | $(SOBJ_DIR)
+#	$(CC) $(CC_PIC_FLAG) -c $(CFLAGS) $(INCLUDE) $^ -o $@
+#$(TOBJ_DIR)/%.o:: %$(CODE_EXT) | $(TOBJ_DIR)
+#	$(CC) -c $(CFLAGS) $(INCLUDE) $^ -o $@
 
 %$(STATIC_LIB_EXT): $(OFILES)	| $(LIB)
 	@echo "Generating static library: $@ ..."
 	$(AR) rc $@ $^
 	$(CP) -f $@ $(LIB)/
-	@echo "$@ is ready."
 
-%$(SHARED_LIB_EXT): $(SOFILES)
+%$(SHARED_LIB_EXT): $(SOFILES)  | $(LIB)
 	@echo "Generating shared library: $@ ..."
 	$(CC) -shared $(LDFLAGS) -o $@ $^
 	$(CP) -f $@ $(LIB)/
-	@echo "$@ is ready."
 
 $(sort $(MKDIRS)):
 	$(MKDIR) -p $@
@@ -53,7 +56,7 @@ clean::
 	$(RM) -rf $(OBJ_DIR) $(SOBJ_DIR) $(TOBJ_DIR)
 	$(RM) -rf $(CLEAN_LIST)
 
-debug:
+debug::
 	@echo "PROJECT_ROOT = $(PROJECT_ROOT)"
 	@echo "PROCESSOR = $(PROCESSOR)"
 	@echo "ARCH_SUFFIX = $(ARCH_SUFFIX)"

@@ -84,13 +84,11 @@ void Benchmark::start() {
     cout << "start benchmark ..." << endl;
 
     ADD_METHOD(time33_simple);
-    /*
     ADD_METHOD(time33_simple_shift);
     ADD_METHOD(time33_simple_unsigned_char);
     ADD_METHOD(time33_simple_truncate);
     ADD_METHOD(time33_apache);
     ADD_METHOD(time33_php);
-    */
 
     long begin_time = 0;
     long end_time = 0;
